@@ -1,0 +1,3 @@
+[console_scripts]
+tp_planner = tp_package.tp_planner:main
+

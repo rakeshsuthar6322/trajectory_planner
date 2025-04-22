@@ -1,0 +1,5 @@
+  File "/home/autonomous/tp_ws/src/TheElite_Path_Planner/install/tp_package/lib/python3.10/site-packages/tp_package/tp_planner.py", line 106
+    f"Target: V={target_speed:.2f} m/s, Steer={target_ste
+    ^
+SyntaxError: unterminated string literal (detected at line 106)
+
