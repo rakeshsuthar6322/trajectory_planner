@@ -11,7 +11,7 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 ---
 
 <div align="center">
-    <img src="Images/TP_image.png" height=500, width=800>
+    <img src="Images/tp_image.jpg" height=500, width=800>
 </div>
 
 ---
