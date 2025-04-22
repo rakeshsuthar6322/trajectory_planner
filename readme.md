@@ -56,7 +56,7 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 ```
 2. Build the package:
 ```bash
- colcon build --packages-select tj_planner
+ colcon build --packages-select tp_package
 ```
 3. Source the workspace:
 ```bash
@@ -68,7 +68,7 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 To launch all of the nodes in lateral control package, run the following command:
 
 ```bash
-ros2 run tj_planner tj_package 
+ros2 run tp_package tp_planner 
 ```
 
 ## Testing
