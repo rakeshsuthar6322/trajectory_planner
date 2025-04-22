@@ -1,4 +1,4 @@
-# Path and Trajectory Planner
+# Trajectory Planner
 ROS2 path and trajectory planner repository(Team Elite).
 
 ## Main Contributor
@@ -6,7 +6,7 @@ Sachin ([@ann2716s](https://git.hs-coburg.de/ann2716s))
 
 ## Component Description
 
-The Path and Trajectory Planner is a core component of an Autonomous Pupil Transport System. It is responsible for planning and executing a safe and efficient route for the autonomous school shuttle.It receives real-time vehicle motion data, student pickup, and school locations, then computes an optimized path while avoiding obstacles. The planner publishes velocity commands to navigate the shuttle efficiently from the starting point to the destination.
+The TrajectoryPlanner component is responsible for autonomously controlling a vehicle along a predefined path using Ackermann steering. It operates in real-time to process sensor inputs, evaluate the driving environment, and issue drive commands accordingly.
 
 ---
 
@@ -29,15 +29,18 @@ The Path and Trajectory Planner is a core component of an Autonomous Pupil Trans
 ### Node: `path and trajectory Planner`
 #### Topics
 
-| **Topic Name**            | **Input/Output**    | **Message Type**             | **Description** |
-|---------------------------|---------------------|------------------------------|-----------------|
-| `/current_pose`           | **Input** (Subscribe) | `geometry_msgs/PoseStamped`  | Provides the shuttle's real-time position. |
-| `/student_position_xyz`   | **Input** (Subscribe) | `el_msgs/msg/studentLocationXYZ.msg`  | Receives both the student pickup location and school destination. |
-| `/obstacle_detection`     | **Input** (Subscribe) | `sensor_msgs/LaserScan`      | Detects obstacles along the planned route. |
-| `/vehicle_motion_state`   | **Input** (Subscribe) | `std_msgs/String`            | Retrieves real-time motion state from the master controller. |
-| `/path_data`     | **Output** (Publish)  | `nav_msgs/Path`              | Publishes the computed trajectory from start to destination. |
-| `/target_velocity`                | **Output** (Publish)  | `std_msgs/Float64`        | Sends velocity commands for shuttle movement. |
-| `/target_steering_angle`          | **Output** (Publish)  | `std_msgs/Float64`        | Sends steering angle commands for shuttle movement. |
+### 🧾 TrajectoryPlanner – Topic Interface Table
+
+| **Topic**                   | **Input/Output** | **Message Type**               | *Description**                                                  |
+|----------------------------|---------|---------------------------------|------------------------------------------------------------------|
+| `/ego_pose`                | Input   | `geometry_msgs/PoseStamped`     | Current position and orientation of the vehicle.                 |
+| `/ego_twist`               | Input   | `geometry_msgs/TwistStamped`    | Current velocity (linear & angular) of the vehicle.              |
+| `/path_data`               | Input   | `nav_msgs/Path`                 | Path the vehicle is expected to follow.                          |
+| `/obstacle_detected`       | Input   | `std_msgs/Bool`                 | Signals if an obstacle is detected in the path.                  |
+| `/vehicle_state`           | Input   | `std_msgs/String`               | Vehicle state: "Idle" or "Driving".                              |
+| `/ackermann_drive_feedback`| Input   | `ackermann_msgs/AckermannDrive` | Feedback of actual speed and steering.                           |
+| `/ackermann_drive`         | Output  | `ackermann_msgs/AckermannDrive` | Publishes target speed and steering to control the vehicle.      |
+
 ## RQT_graph
 ---
 <div align="center">
