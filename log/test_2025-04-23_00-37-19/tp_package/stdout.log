@@ -1,0 +1,18 @@
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.10.12, pytest-6.2.5, py-1.10.0, pluggy-0.13.0
+cachedir: /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/.pytest_cache
+rootdir: /home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package
+plugins: ament-copyright-0.12.11, ament-flake8-0.12.11, ament-pep257-0.12.11, ament-lint-0.12.11, ament-xmllint-0.12.11, launch-testing-1.0.6, launch-testing-ros-0.19.7, colcon-core-0.18.4, cov-3.0.0
+[1mcollecting ... [0m[1m
+collecting 0 items                                                             [0m[1m
+collected 5 items                                                              [0m
+
+test/test_tp_package.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m                                            [100%][0m[31m[1mWARNING: Failed to generate report: No data to report.
+
+[0m
+
+- generated xml file: /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/pytest.xml -
+
+---------- coverage: platform linux, python 3.10.12-final-0 ----------
+
+[32m============================== [32m[1m5 passed[0m[32m in 1.45s[0m[32m ===============================[0m

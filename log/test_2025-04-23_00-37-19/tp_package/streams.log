@@ -1,0 +1,24 @@
+[1.354s] Invoking command in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package': AMENT_PREFIX_PATH=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package:${AMENT_PREFIX_PATH} PYTEST_ADDOPTS=--tb=short --junit-xml=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/pytest.xml --junit-prefix=tp_package -o cache_dir=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/.pytest_cache "--cov=tp_package --cov-report=term-missing" PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -m pytest
+[2.045s] [1m============================= test session starts ==============================[0m
+[2.045s] platform linux -- Python 3.10.12, pytest-6.2.5, py-1.10.0, pluggy-0.13.0
+[2.063s] cachedir: /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/.pytest_cache
+[2.063s] rootdir: /home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package
+[2.063s] plugins: ament-copyright-0.12.11, ament-flake8-0.12.11, ament-pep257-0.12.11, ament-lint-0.12.11, ament-xmllint-0.12.11, launch-testing-1.0.6, launch-testing-ros-0.19.7, colcon-core-0.18.4, cov-3.0.0
+[2.864s] [1mcollecting ... [0m[1m
+[2.898s] collecting 0 items                                                             [0m[1m
+[2.900s] collected 5 items                                                              [0m
+[2.904s] 
+[3.490s] Warning: Module tp_package --cov-report=term-missing was never imported. (module-not-imported)
+[3.490s] Warning: No data was collected. (no-data-collected)
+[3.496s] test/test_tp_package.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m                                            [100%][0m[31m[1mWARNING: Failed to generate report: No data to report.
+[3.497s] 
+[3.497s] Warning: Failed to generate report: No data to report.
+[3.497s] 
+[3.497s] [0m
+[3.498s] 
+[3.498s] - generated xml file: /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/pytest.xml -
+[3.498s] 
+[3.498s] ---------- coverage: platform linux, python 3.10.12-final-0 ----------
+[3.499s] 
+[3.499s] [32m============================== [32m[1m5 passed[0m[32m in 1.45s[0m[32m ===============================[0m
+[3.739s] Invoked command in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package' returned '0': AMENT_PREFIX_PATH=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package:${AMENT_PREFIX_PATH} PYTEST_ADDOPTS=--tb=short --junit-xml=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/pytest.xml --junit-prefix=tp_package -o cache_dir=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/.pytest_cache "--cov=tp_package --cov-report=term-missing" PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -m pytest

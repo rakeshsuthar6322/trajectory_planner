@@ -1,0 +1,23 @@
+[0.592s] Invoking command in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package': PYTEST_ADDOPTS=--tb=short --junit-xml=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/pytest.xml --junit-prefix=tp_package -o cache_dir=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/.pytest_cache "--cov=tp_package --cov-report=term-missing" PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -m pytest
+[1.241s] [1m============================= test session starts ==============================[0m
+[1.241s] platform linux -- Python 3.10.12, pytest-6.2.5, py-1.10.0, pluggy-0.13.0
+[1.260s] cachedir: /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/.pytest_cache
+[1.261s] rootdir: /home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package
+[1.261s] plugins: ament-copyright-0.12.11, ament-flake8-0.12.11, ament-pep257-0.12.11, ament-lint-0.12.11, ament-xmllint-0.12.11, launch-testing-1.0.6, launch-testing-ros-0.19.7, colcon-core-0.18.4, cov-3.0.0
+[1.737s] [1mcollecting ... [0m[1m
+[1.737s] collected 5 items                                                              [0m
+[1.738s] 
+[2.162s] Warning: Module tp_package --cov-report=term-missing was never imported. (module-not-imported)
+[2.162s] Warning: No data was collected. (no-data-collected)
+[2.170s] test/test_tp_package.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m                                            [100%][0m[31m[1mWARNING: Failed to generate report: No data to report.
+[2.170s] 
+[2.171s] Warning: Failed to generate report: No data to report.
+[2.171s] 
+[2.171s] [0m
+[2.171s] 
+[2.172s] - generated xml file: /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/pytest.xml -
+[2.172s] 
+[2.172s] ---------- coverage: platform linux, python 3.10.12-final-0 ----------
+[2.172s] 
+[2.172s] [32m============================== [32m[1m5 passed[0m[32m in 0.93s[0m[32m ===============================[0m
+[2.399s] Invoked command in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package' returned '0': PYTEST_ADDOPTS=--tb=short --junit-xml=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/pytest.xml --junit-prefix=tp_package -o cache_dir=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/.pytest_cache "--cov=tp_package --cov-report=term-missing" PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -m pytest

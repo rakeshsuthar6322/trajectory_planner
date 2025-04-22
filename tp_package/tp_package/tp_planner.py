@@ -16,17 +16,17 @@ class TrajectoryPlanner(Node):
         self.ego_twist = None
         self.path = []
         self.obstacle_detected = False
-        self.vehicle_state = "Idle"  # "Idle", "Driving", "Boarding"
+        self.vehicle_state = "Idle"  # "Idle", "Boarding", or "Driving"
         self.reached_end = False
-        self.location_published = False  # Prevent repeat publishing
+        self.published_student_location = False
 
         # Feedback state
         self.feedback_speed = 0.0
         self.feedback_steering_angle = 0.0
 
         # Velocity constraints
-        self.min_speed = 1.0
-        self.max_speed = 2.0
+        self.min_speed = 2.0
+        self.max_speed = 3.0
 
         # Time tracking
         self.start_time = self.get_clock().now()
@@ -44,7 +44,7 @@ class TrajectoryPlanner(Node):
         self.create_subscription(AckermannDrive, '/ackermann_drive_feedback', self.feedback_callback, 10)
 
         # Timer for periodic processing
-        self.create_timer(0.1, self.control_loop)  # 10 Hz
+        self.create_timer(0.1, self.control_loop)
 
     def pose_callback(self, msg):
         self.ego_pose = msg.pose
@@ -55,7 +55,7 @@ class TrajectoryPlanner(Node):
     def path_callback(self, msg):
         self.path = msg.poses
         self.reached_end = False
-        self.location_published = False
+        self.published_student_location = False
         self.start_time = self.get_clock().now()
         self.get_logger().info(f"Received new path with {len(self.path)} waypoints.")
 
@@ -65,7 +65,7 @@ class TrajectoryPlanner(Node):
         self.get_logger().info(f"Obstacle detected: {status}")
 
     def state_callback(self, msg):
-        self.vehicle_state = msg.data.strip().capitalize()
+        self.vehicle_state = msg.data
         self.get_logger().info(f"Vehicle state: {self.vehicle_state}")
 
     def feedback_callback(self, msg):
@@ -73,71 +73,64 @@ class TrajectoryPlanner(Node):
         self.feedback_steering_angle = msg.steering_angle
 
     def control_loop(self):
-        # Check required data
-        if not self.ego_pose or not self.ego_twist or not self.path:
+        if not self.ego_pose or not self.ego_twist:
             return
 
-        # Define the maximum and minimum steering angles in radians
-        MAX_STEERING_ANGLE = math.radians(30)  # Convert 30 degrees to radians
-        MIN_STEERING_ANGLE = math.radians(-30)  # Convert -30 degrees to radians
+        # Endpoint threshold check
+        ego_x = self.ego_pose.position.x
+        ego_y = self.ego_pose.position.y
+        if 3.0 <= ego_x <= 4.5 and 0.0 <= ego_y <= 1.80:
+            self.reached_end = True
 
-        # Obstacle block
+        if self.reached_end:
+            if not self.published_student_location:
+                student_msg = String()
+                student_msg.data = "First Student"
+                self.student_location_pub.publish(student_msg)
+                self.published_student_location = True
+                self.get_logger().info("Published student_location: First Student")
+
+            self.publish_velocity(0.0, 0.0)
+            return
+
+        # Stop conditions
         if self.obstacle_detected:
             self.get_logger().info("Stopping: Obstacle detected.")
             self.publish_velocity(0.0, 0.0)
             return
 
-        # Not in driving mode
-        if self.vehicle_state != "Driving":
-            self.get_logger().info(f"Stopping: Vehicle state is not 'Driving' (current: '{self.vehicle_state}').")
+        if self.vehicle_state.strip() == "Boarding":
+            self.get_logger().info("Stopping: Vehicle state is 'Boarding'.")
             self.publish_velocity(0.0, 0.0)
             return
 
-        # Check bounding box threshold to stop
-        x = self.ego_pose.position.x
-        y = self.ego_pose.position.y
-
-        if 3.0 <= x <= 4.0 and 0.0 <= y <= 1.75:
-            self.reached_end = True
-            self.get_logger().info("Reached end of path within positional threshold (x: 3–4, y: 0–1.75). Stopping.")
+        if self.vehicle_state.strip() != "Driving":
+            self.get_logger().info(f"Stopping: Vehicle state is '{self.vehicle_state}'.")
             self.publish_velocity(0.0, 0.0)
-
-            if not self.location_published:
-                msg = String()
-                msg.data = "First Student"
-                self.student_location_pub.publish(msg)
-                self.location_published = True
-                self.get_logger().info("Published student location: First Student")
             return
 
-        # Speed ramp-up logic
+        # Ramp up speed
         current_time = self.get_clock().now()
         elapsed_time = (current_time - self.start_time).nanoseconds * 1e-9
         ramp_up_time = 5.0
         final_speed = self.max_speed
 
-        if elapsed_time < ramp_up_time:
-            target_speed = (elapsed_time / ramp_up_time) * final_speed
-        else:
-            target_speed = final_speed
+        target_speed = (elapsed_time / ramp_up_time) * final_speed if elapsed_time < ramp_up_time else final_speed
 
-        # Placeholder for Pure Pursuit logic (you should calculate target_steering_angle here)
-        target_steering_angle = 0.0  # Assume Pure Pursuit gives us this angle in radians
+        # --- Fixed steering angle ---
+        steering_angle = 0.0
 
-        # Apply the steering angle limits to clamp the value
-        target_steering_angle = max(min(target_steering_angle, MAX_STEERING_ANGLE), MIN_STEERING_ANGLE)
-
-        # Feedback logging
+        # Logging for feedback
         speed_error = abs(self.feedback_speed - target_speed)
-        steer_error = abs(self.feedback_steering_angle - target_steering_angle)
+        steer_error = abs(self.feedback_steering_angle - steering_angle)
 
         self.get_logger().info(
-            f"Target: V={target_speed:.2f}, Steer={target_steering_angle:.2f} | "
+            f"Target: V={target_speed:.2f}, Steer={steering_angle:.2f} | "
             f"Feedback: V={self.feedback_speed:.2f}, Steer={self.feedback_steering_angle:.2f} | "
             f"Error: V={speed_error:.2f}, Steer={steer_error:.2f}"
         )
 
-        self.publish_velocity(target_speed, target_steering_angle)
+        self.publish_velocity(target_speed, steering_angle)
 
     def publish_velocity(self, speed, steering_angle=0.0):
         drive_msg = AckermannDrive()
@@ -154,26 +147,6 @@ class TrajectoryPlanner(Node):
             f"Speed: {drive_msg.speed:.2f}, "
             f"Steering Angle: {drive_msg.steering_angle:.2f}"
         )
-
-    def get_next_waypoint(self):
-        if not self.path:
-            return None
-
-        closest_index = None
-        min_dist = float('inf')
-
-        for i, pose_stamped in enumerate(self.path):
-            dist = self.euclidean_distance(self.ego_pose.position, pose_stamped.pose.position)
-            if dist < min_dist:
-                min_dist = dist
-                closest_index = i
-
-        if closest_index is not None and closest_index + 1 < len(self.path):
-            return self.path[closest_index + 1].pose
-        elif closest_index == len(self.path) - 1:
-            self.reached_end = True
-            return None
-        return None
 
     @staticmethod
     def euclidean_distance(p1, p2):
