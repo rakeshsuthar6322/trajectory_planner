@@ -35,16 +35,16 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 |----------------------------|---------|---------------------------------|------------------------------------------------------------------|
 | `/ego_pose`                | Input   | `geometry_msgs/PoseStamped`     | Current position and orientation of the vehicle.                 |
 | `/ego_twist`               | Input   | `geometry_msgs/TwistStamped`    | Current velocity (linear & angular) of the vehicle.              |
-| `/path_data`               | Input   | `nav_msgs/Path`                 | Path the vehicle is expected to follow.                          |
+| `/path_data`               | Input   | `nav_msgs/Path`                 | Path that the vehicle is expected to follow.                     |
 | `/obstacle_detected`       | Input   | `std_msgs/Bool`                 | Signals if an obstacle is detected in the path.                  |
-| `/vehicle_state`           | Input   | `std_msgs/String`               | Vehicle state: "Idle" or "Driving".                              |
+| `/vehicle_state`           | Input   | `std_msgs/String`               | Vehicle state: "Idle","Driving","Boarding","Drop-Off"            |
 | `/ackermann_drive_feedback`| Input   | `ackermann_msgs/AckermannDrive` | Feedback of actual speed and steering.                           |
 | `/ackermann_drive`         | Output  | `ackermann_msgs/AckermannDrive` | Publishes target speed and steering to control the vehicle.      |
 
 ## RQT_graph
 ---
 <div align="center">
-    <img src="Images/rqt_tp.png" height=500, width=800>
+    <img src="Images/rqt_pic.png" height=500, width=800>
 </div>
 ---
 
