@@ -6,7 +6,7 @@ Sachin ([@ann2716s](https://git.hs-coburg.de/ann2716s))
 
 ## Component Description
 
-The TrajectoryPlanner component is responsible for autonomously controlling a vehicle along a predefined path using Ackermann steering. It operates in real-time to process sensor inputs, evaluate the driving environment, and issue drive commands accordingly.
+The TrajectoryPlanner component is responsible for autonomously controlling a vehicle along a predefined path using Ackermann driving commands. It operates in real-time to process sensor inputs, evaluate the driving environment, and issue drive commands accordingly.
 
 ---
 
