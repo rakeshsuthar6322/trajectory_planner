@@ -48,6 +48,38 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 </div>
 ---
 
+## User Story
+
+C2.2:
+As a Trajectory Planner component,
+I want to compute a time-based trajectory with velocity, acceleration, and deceleration limits,
+So that the ego-vehicle follows the path smoothly and efficiently.
+
+## Acceptance Criteria:
+
+    AC1:
+    The component shall subscribe to the following topics:
+
+        /path_plan (from Path Planner)
+
+        /ego_pose and /ego_twist (from Localization)
+
+        /obstacle_detected (from Object Detection)
+
+        /vehicle_state (from Master Controller)
+
+    AC2:
+    The planner shall generate target driving commands for the vehicle to move in a straight direction based on the received path.
+
+    AC3:
+    The planner shall publish the generated driving commands to the topic:
+
+        /ackermann_drive
+        These commands must include longitudinal velocity and steering angles.
+
+    AC4:
+    The component shall implement a feedback loop by subscribing to /ackermann_drive_feedback.
+
 ## Functionality
 
 This ROS 2 node (`TrajectoryPlanner`) manages autonomous trajectory execution for an Ackermann-steered vehicle. It combines path-following, vehicle_state, speed control, and obstacle handling with real-time vehicle state feedback to achieve safe and structured navigation.
