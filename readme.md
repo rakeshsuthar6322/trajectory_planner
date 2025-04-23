@@ -48,6 +48,57 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 </div>
 ---
 
+## Functionality
+
+This ROS 2 node (`TrajectoryPlanner`) manages autonomous trajectory execution for an Ackermann-steered vehicle. It combines path-following, vehicle_state, speed control, and obstacle handling with real-time vehicle state feedback to achieve safe and structured navigation.
+
+---
+
+## Features
+
+### Vehicle State Management
+- Supports three vehicle states: `"Idle"`, `"Boarding"`, and `"Driving"`.
+- Vehicle halts if state is `"Idle"` or `"Boarding"`.
+
+### Path Tracking
+- Subscribes to planned paths via the `/path_data` topic.
+- Determines when the vehicle reaches its goal based on a positional threshold.
+
+### Speed Control (Ramp-Up Logic)
+- Gradually increases speed over **5 seconds** to a maximum of **3.0 m/s**.
+- Publishes drive commands with a fixed **steering angle of 0.0** (straight path).
+- Motion continues unless:
+  - The vehicle reaches the goal zone.
+  - An obstacle is detected.
+  - The state is not `"Driving"`.
+
+### Obstacle Detection
+- Listens to the `/obstacle_detected` topic.
+- Immediately stops the vehicle when an obstacle is reported.
+
+### Feedback Integration
+- Subscribes to `/ackermann_drive_feedback` to track real-time:
+  - Speed
+  - Steering angle
+- Logs target vs. actual values and their errors for debugging purposes.
+
+### Student Location Broadcasting
+- Once the vehicle enters the goal zone:
+  - **X ∈ [3.0, 4.5]**
+  - **Y ∈ [0.0, 1.8]**
+- Publishes a one-time message: `"First Student"` to the `/student_location` topic.
+
+
+## Configuration
+
+### Velocity Settings
+- `min_speed = 1.0` m/s
+- `max_speed = 4.0` m/s
+- `ramp_up_time = 5.0` seconds
+
+
+
+
 
 ## Installation
 1. Clone the repository:
