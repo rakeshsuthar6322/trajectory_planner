@@ -1,0 +1,22 @@
+[2.040s] Invoking command in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package': PYTHONPATH=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/tp_package build --build-base /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/build install --record /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/install.log --single-version-externally-managed install_data
+[2.409s] running egg_info
+[2.410s] writing ../build/tp_package/tp_package.egg-info/PKG-INFO
+[2.463s] writing dependency_links to ../build/tp_package/tp_package.egg-info/dependency_links.txt
+[2.464s] writing entry points to ../build/tp_package/tp_package.egg-info/entry_points.txt
+[2.464s] writing requirements to ../build/tp_package/tp_package.egg-info/requires.txt
+[2.464s] writing top-level names to ../build/tp_package/tp_package.egg-info/top_level.txt
+[2.469s] reading manifest file '../build/tp_package/tp_package.egg-info/SOURCES.txt'
+[2.469s] adding license file 'LICENSE'
+[2.471s] writing manifest file '../build/tp_package/tp_package.egg-info/SOURCES.txt'
+[2.471s] running build
+[2.471s] running build_py
+[2.474s] running install
+[2.474s] running install_lib
+[2.478s] running install_data
+[2.480s] running install_egg_info
+[2.483s] removing '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/python3.10/site-packages/tp_package-0.0.0-py3.10.egg-info' (and everything under it)
+[2.483s] Copying ../build/tp_package/tp_package.egg-info to /home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/python3.10/site-packages/tp_package-0.0.0-py3.10.egg-info
+[2.486s] running install_scripts
+[2.516s] Installing tp_planner script to /home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/tp_package
+[2.517s] writing list of installed files to '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/install.log'
+[2.544s] Invoked command in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package' returned '0': PYTHONPATH=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/tp_package build --build-base /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/build install --record /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/install.log --single-version-externally-managed install_data

@@ -11,24 +11,24 @@ class TrajectoryPlanner(Node):
     def __init__(self):
         super().__init__('trajectory_planner')
 
-        # Internal state
+        # Internal state to be checked once with other compo
         self.ego_pose = None
         self.ego_twist = None
         self.path = []
         self.obstacle_detected = False
-        self.vehicle_state = "Idle"  # "Idle", "Boarding", or "Driving"
+        self.vehicle_state = "Idle"  # "Idle", "Boarding", or "Driving these are three states implemented Drop-off is not yet done"
         self.reached_end = False
         self.published_student_location = False
 
-        # Feedback state
+        # Feedback state the feedback messages from sensors are 
         self.feedback_speed = 0.0
         self.feedback_steering_angle = 0.0
 
-        # Velocity constraints
+        # Velocity limit ,,,, try with different
         self.min_speed = 2.0
         self.max_speed = 3.0
 
-        # Time tracking
+        # Time tracking i am using this to record for the ramp-up logic
         self.start_time = self.get_clock().now()
 
         # Publishers
@@ -43,7 +43,7 @@ class TrajectoryPlanner(Node):
         self.create_subscription(String, '/vehicle_state', self.state_callback, 10)
         self.create_subscription(AckermannDrive, '/ackermann_drive_feedback', self.feedback_callback, 10)
 
-        # Timer for periodic processing
+        # thw control loop timing for impl
         self.create_timer(0.1, self.control_loop)
 
     def pose_callback(self, msg):
@@ -73,10 +73,11 @@ class TrajectoryPlanner(Node):
         self.feedback_steering_angle = msg.steering_angle
 
     def control_loop(self):
+        #only start if iti is recieved
         if not self.ego_pose or not self.ego_twist:
             return
 
-        # Endpoint threshold check
+        # Endpoint threshold 
         ego_x = self.ego_pose.position.x
         ego_y = self.ego_pose.position.y
         if 3.0 <= ego_x <= 4.5 and 0.0 <= ego_y <= 1.80:
@@ -93,7 +94,7 @@ class TrajectoryPlanner(Node):
             self.publish_velocity(0.0, 0.0)
             return
 
-        # Stop conditions
+        # Stop conditions(car sets velocity zero)
         if self.obstacle_detected:
             self.get_logger().info("Stopping: Obstacle detected.")
             self.publish_velocity(0.0, 0.0)
@@ -109,7 +110,7 @@ class TrajectoryPlanner(Node):
             self.publish_velocity(0.0, 0.0)
             return
 
-        # Ramp up speed
+        # slow increase in speed
         current_time = self.get_clock().now()
         elapsed_time = (current_time - self.start_time).nanoseconds * 1e-9
         ramp_up_time = 5.0
@@ -117,17 +118,17 @@ class TrajectoryPlanner(Node):
 
         target_speed = (elapsed_time / ramp_up_time) * final_speed if elapsed_time < ramp_up_time else final_speed
 
-        # --- Fixed steering angle ---
+        # sttering angle is zero since longitudinal
         steering_angle = 0.0
 
         # Logging for feedback
         speed_error = abs(self.feedback_speed - target_speed)
         steer_error = abs(self.feedback_steering_angle - steering_angle)
-
+        #logger for the terminal
         self.get_logger().info(
             f"Target: V={target_speed:.2f}, Steer={steering_angle:.2f} | "
             f"Feedback: V={self.feedback_speed:.2f}, Steer={self.feedback_steering_angle:.2f} | "
-            f"Error: V={speed_error:.2f}, Steer={steer_error:.2f}"
+            
         )
 
         self.publish_velocity(target_speed, steering_angle)
@@ -148,7 +149,7 @@ class TrajectoryPlanner(Node):
             f"Steering Angle: {drive_msg.steering_angle:.2f}"
         )
 
-    @staticmethod
+    @staticmethod#not using but helpful for pure pursuit controller
     def euclidean_distance(p1, p2):
         return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
 
