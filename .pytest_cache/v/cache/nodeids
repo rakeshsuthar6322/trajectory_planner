@@ -1,0 +1,19 @@
+[
+  "tp_package/test/test_tp_package.py::TestTrajectoryPlanner::test_endpoint_stop",
+  "tp_package/test/test_tp_package.py::TestTrajectoryPlanner::test_missing_inputs_skips_publish_and_warns_once",
+  "tp_package/test/test_tp_package.py::TestTrajectoryPlanner::test_obstacle_detected_publishes_stop",
+  "tp_package/test/test_tp_package.py::TestTrajectoryPlanner::test_print_ackermann_drive_in_terminal",
+  "tp_package/test/test_tp_package.py::TestTrajectoryPlanner::test_pure_pursuit_command_limits",
+  "tp_package/test/test_tp_package.py::TestTrajectoryPlanner::test_vehicle_state_not_driving_publishes_stop",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_all_path_behind_stops_and_warns",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_endpoint_stop",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_feedback_callback_noop",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_missing_inputs_skips_publish_and_warns_once",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_no_lookahead_fallback_uses_closest",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_obstacle_detected_publishes_stop",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_print_ackermann_drive_in_terminal",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_prune_path_removes_behind_waypoints",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_pure_pursuit_command_limits",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_student_location_publishing",
+  "tp_package/test/test_tp_planner.py::TestTrajectoryPlanner::test_vehicle_state_not_driving_publishes_stop"
+]
