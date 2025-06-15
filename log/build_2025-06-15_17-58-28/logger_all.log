@@ -1,0 +1,127 @@
+[1.521s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[1.521s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=3, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x771dd221ef80>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x771dd221ea70>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x771dd221ea70>>)
+[4.928s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[4.928s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[4.928s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[4.928s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[4.929s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[4.929s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[4.929s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner'
+[4.929s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[4.929s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[4.929s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[4.930s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[4.930s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[4.930s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[4.930s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[4.930s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[4.930s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[4.970s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[4.970s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[4.970s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extensions ['ignore', 'ignore_ament_install']
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extension 'ignore'
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extension 'ignore_ament_install'
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extensions ['colcon_pkg']
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extension 'colcon_pkg'
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extensions ['colcon_meta']
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extension 'colcon_meta'
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extensions ['ros']
+[4.971s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extension 'ros'
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extensions ['cmake', 'python']
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extension 'cmake'
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extension 'python'
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extensions ['python_setup_py']
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(Images) by extension 'python_setup_py'
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[4.972s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(tp_package) by extensions ['ignore', 'ignore_ament_install']
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(tp_package) by extension 'ignore'
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(tp_package) by extension 'ignore_ament_install'
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(tp_package) by extensions ['colcon_pkg']
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(tp_package) by extension 'colcon_pkg'
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(tp_package) by extensions ['colcon_meta']
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(tp_package) by extension 'colcon_meta'
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(tp_package) by extensions ['ros']
+[4.973s] Level 1:colcon.colcon_core.package_identification:_identify(tp_package) by extension 'ros'
+[4.996s] DEBUG:colcon.colcon_core.package_identification:Package 'tp_package' with type 'ros.ament_python' and name 'tp_package'
+[4.996s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[4.996s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[4.996s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[4.996s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[4.996s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[5.192s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[5.192s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[5.201s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/autonomous/tp_ws/src/TheElite_trajectory_planner/install
+[5.203s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 326 installed packages in /opt/ros/humble
+[5.217s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[6.398s] Level 5:colcon.colcon_core.verb:set package 'tp_package' build argument 'cmake_args' from command line to 'None'
+[6.398s] Level 5:colcon.colcon_core.verb:set package 'tp_package' build argument 'cmake_target' from command line to 'None'
+[6.398s] Level 5:colcon.colcon_core.verb:set package 'tp_package' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[6.398s] Level 5:colcon.colcon_core.verb:set package 'tp_package' build argument 'cmake_clean_cache' from command line to 'False'
+[6.398s] Level 5:colcon.colcon_core.verb:set package 'tp_package' build argument 'cmake_clean_first' from command line to 'False'
+[6.398s] Level 5:colcon.colcon_core.verb:set package 'tp_package' build argument 'cmake_force_configure' from command line to 'False'
+[6.398s] Level 5:colcon.colcon_core.verb:set package 'tp_package' build argument 'ament_cmake_args' from command line to 'None'
+[6.398s] Level 5:colcon.colcon_core.verb:set package 'tp_package' build argument 'catkin_cmake_args' from command line to 'None'
+[6.398s] Level 5:colcon.colcon_core.verb:set package 'tp_package' build argument 'catkin_skip_building_tests' from command line to 'False'
+[6.398s] DEBUG:colcon.colcon_core.verb:Building package 'tp_package' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package', 'merge_install': False, 'path': '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package', 'symlink_install': False, 'test_result_base': None}
+[6.399s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[6.400s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[6.400s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package' with build type 'ament_python'
+[6.400s] Level 1:colcon.colcon_core.shell:create_environment_hook('tp_package', 'ament_prefix_path')
+[6.412s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[6.412s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/hook/ament_prefix_path.ps1'
+[6.424s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/hook/ament_prefix_path.dsv'
+[6.436s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/hook/ament_prefix_path.sh'
+[6.439s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[6.439s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[7.155s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package'
+[7.156s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[7.156s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[8.237s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package': PYTHONPATH=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/tp_package build --build-base /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/build install --record /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/install.log --single-version-externally-managed install_data
+[8.823s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/tp_package' returned '0': PYTHONPATH=/home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/tp_package build --build-base /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/build install --record /home/autonomous/tp_ws/src/TheElite_trajectory_planner/build/tp_package/install.log --single-version-externally-managed install_data
+[9.031s] Level 1:colcon.colcon_core.environment:checking '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package' for CMake module files
+[9.033s] Level 1:colcon.colcon_core.environment:checking '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package' for CMake config files
+[9.035s] Level 1:colcon.colcon_core.environment:checking '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib'
+[9.036s] Level 1:colcon.colcon_core.environment:checking '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/bin'
+[9.036s] Level 1:colcon.colcon_core.environment:checking '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/pkgconfig/tp_package.pc'
+[9.037s] Level 1:colcon.colcon_core.environment:checking '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/lib/python3.10/site-packages'
+[9.037s] Level 1:colcon.colcon_core.shell:create_environment_hook('tp_package', 'pythonpath')
+[9.038s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/hook/pythonpath.ps1'
+[9.039s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/hook/pythonpath.dsv'
+[9.040s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/hook/pythonpath.sh'
+[9.041s] Level 1:colcon.colcon_core.environment:checking '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/bin'
+[9.042s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(tp_package)
+[9.043s] INFO:colcon.colcon_core.shell:Creating package script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/package.ps1'
+[9.047s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/package.dsv'
+[9.049s] INFO:colcon.colcon_core.shell:Creating package script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/package.sh'
+[9.051s] INFO:colcon.colcon_core.shell:Creating package script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/package.bash'
+[9.055s] INFO:colcon.colcon_core.shell:Creating package script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/tp_package/package.zsh'
+[9.209s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/tp_package/share/colcon-core/packages/tp_package)
+[9.210s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[9.210s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[9.210s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[9.210s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[9.223s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[9.223s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[9.223s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[9.242s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[9.243s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/local_setup.ps1'
+[9.245s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/_local_setup_util_ps1.py'
+[9.247s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/setup.ps1'
+[9.249s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/local_setup.sh'
+[9.253s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/_local_setup_util_sh.py'
+[9.254s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/setup.sh'
+[9.257s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/local_setup.bash'
+[9.261s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/setup.bash'
+[9.265s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/local_setup.zsh'
+[9.267s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/autonomous/tp_ws/src/TheElite_trajectory_planner/install/setup.zsh'
