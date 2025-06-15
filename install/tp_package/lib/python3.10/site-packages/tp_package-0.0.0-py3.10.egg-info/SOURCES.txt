@@ -10,6 +10,6 @@ setup.py
 ../build/tp_package/tp_package.egg-info/top_level.txt
 ../build/tp_package/tp_package.egg-info/zip-safe
 resource/tp_package
-test/test_tp_package.py
+test/test_tp_planner.py
 tp_package/__init__.py
 tp_package/tp_planner.py

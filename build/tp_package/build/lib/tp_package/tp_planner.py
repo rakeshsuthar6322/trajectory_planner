@@ -1,173 +1,311 @@
+"""Trajectory planner node for autonomous vehicle path following using pure pursuit algorithm.
+
+Publishes steering and speed commands to AckermannDrive message based on odometry and path input.
+Also implements student logic for multi-goal publishing.
+"""
+
+import math
 import rclpy
 from rclpy.node import Node
-import math
-
-from geometry_msgs.msg import PoseStamped, TwistStamped
-from nav_msgs.msg import Path
+from nav_msgs.msg import Path, Odometry
+from std_msgs.msg import Bool, String
 from ackermann_msgs.msg import AckermannDrive
+from geometry_msgs.msg import PoseStamped
 
+def quaternion_to_yaw(q):
+    """Convert quaternion to yaw angle."""
+    siny_cosp = 2 * (q.w * q.z + q.x * q.y)
+    cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
+    return math.atan2(siny_cosp, cosy_cosp)
 
 class TrajectoryPlanner(Node):
+    """Trajectory planner node for path following and student location publishing."""
+
     def __init__(self):
+        """Initialize the trajectory planner node."""
         super().__init__('trajectory_planner')
+        self.ego_pose = None
+        self.ego_twist = None
+        self.path = []
+        self.obstacle_detected = False
+        self.vehicle_state = "Idle"
 
-        # Declare parameters
-        self.declare_parameter('base_lookahead_distance', 1.0)
-        self.declare_parameter('lookahead_gain', 1.5)
-        self.declare_parameter('max_speed', 3.0)
-        self.declare_parameter('min_speed', 1.0)
-        self.declare_parameter('curvature_sensitivity', 50.0)  # Further increase sensitivity to 50.0
-
-        # Load parameters
-        self.base_ld = self.get_parameter('base_lookahead_distance').get_parameter_value().double_value
-        self.ld_gain = self.get_parameter('lookahead_gain').get_parameter_value().double_value
-        self.max_speed = self.get_parameter('max_speed').get_parameter_value().double_value
-        self.min_speed = self.get_parameter('min_speed').get_parameter_value().double_value
-        self.k = self.get_parameter('curvature_sensitivity').get_parameter_value().double_value  # Increased value
-
-        self.wheelbase = 0.26  # meters
-
-        # Steering angle bounds in degrees
-        self.steering_limit_deg = 45.0
-
-        # Vehicle state
-        self.current_pose = None
-        self.current_velocity = 0.0
-        self.path_points = []
-
-        # ROS 2 Interfaces
-        self.create_subscription(PoseStamped, '/ego_pose', self.pose_callback, 10)
-        self.create_subscription(TwistStamped, '/ego_twist', self.twist_callback, 10)
-        self.create_subscription(Path, '/path_data', self.path_callback, 10)
         self.drive_pub = self.create_publisher(AckermannDrive, '/ackermann_drive', 10)
+        self.student_location_pub = self.create_publisher(String, '/student_location', 10)
+        self.student_reached_pub = self.create_publisher(PoseStamped, '/student_reached', 10)
 
-        self.create_timer(0.05, self.control_loop)  # 20 Hz
+        self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.create_subscription(Path, '/path_data', self.path_callback, 10)
+        self.create_subscription(Bool, '/obstacle_detected', self.obstacle_callback, 10)
+        self.create_subscription(String, '/vehicle_state', self.state_callback, 10)
+        self.create_subscription(AckermannDrive, '/ackermann_drive_feedback', self.feedback_callback, 10)
 
-    def pose_callback(self, msg):
-        self.current_pose = msg.pose
+        self.timer = self.create_timer(0.02, self.control_loop)
 
-    def twist_callback(self, msg):
-        self.current_velocity = msg.twist.linear.x
+        # --- student logic ---
+        self.student_list = [
+            "First Student", "Second Student", "Third Student", "Destination Reached"
+        ]
+        self.student_publish_index = 0  # index in student_list
+        self.ready_to_publish_student = False  # set True in path_callback
+        self.student_published_for_this_path = False  # published flag, reset with new path
+        self.was_at_endpoint = False  # Track if robot was at endpoint in previous loop
+
+        self.loop_stopped = False
+        self.missing_input_warned = False
+
+        self.min_speed = 0.3
+        self.max_speed = 0.4
+        self.max_steering_angle_deg = 30.0
+        self.lookahead_distance = 0.7
+        self.wheelbase = 0.50
+        self.steering_smoothing_factor = 0.2
+        self.smoothed_steering_angle = 0.0
+        self.steering_offset_deg = 4.0
+
+    def odom_callback(self, msg):
+        """Odometry callback to update ego pose and twist."""
+        self.ego_pose = msg.pose.pose
+        self.ego_twist = msg.twist.twist
+        wheelbase_half = self.wheelbase / 2.0
+        q = self.ego_pose.orientation
+        yaw = quaternion_to_yaw(q)
+        self.ego_pose.position.x += wheelbase_half * math.cos(yaw)
+        self.ego_pose.position.y += wheelbase_half * math.sin(yaw)
 
     def path_callback(self, msg):
-        self.path_points = [p.pose for p in msg.poses]
+        """Path callback to update the planned path."""
+        self.path = msg.poses
+        self.loop_stopped = False
+        # Core reset for student publishing logic:
+        self.student_published_for_this_path = False
+        self.ready_to_publish_student = True  # allow publishing when endpoint reached
 
-    def get_yaw(self, q):
-        siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
-        cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
-        return math.atan2(siny_cosp, cosy_cosp)
+    def obstacle_callback(self, msg):
+        """Obstacle callback to update obstacle detection state."""
+        self.obstacle_detected = msg.data
 
-    def transform_to_vehicle_frame(self, global_point, pose):
-        x = pose.position.x
-        y = pose.position.y
-        yaw = self.get_yaw(pose.orientation)
+    def state_callback(self, msg):
+        """Vehicle state callback to update the current vehicle state."""
+        self.vehicle_state = msg.data
 
-        dx = global_point.x - x
-        dy = global_point.y - y
+    def feedback_callback(self, msg):
+        """Ackermann drive feedback callback (currently unused)."""
+        pass
 
-        local_x = math.cos(-yaw) * dx - math.sin(-yaw) * dy
-        local_y = math.sin(-yaw) * dx + math.cos(-yaw) * dy
-
-        return local_x, local_y
-
-    def compute_distance(self, p1, p2):
-        return math.hypot(p1.x - p2.x, p1.y - p2.y)
-
-    def find_lookahead_point(self, lookahead_distance):
-        if not self.current_pose or not self.path_points:
-            return None
-
-        pos = self.current_pose.position
-        for point in self.path_points:
-            if self.compute_distance(pos, point.position) >= lookahead_distance:
-                return point.position
-        return None
-
-    def estimate_curvature(self, p0, p1, p2):
-        def dist(a, b):
-            return math.hypot(a.x - b.x, a.y - b.y)
-
-        a = dist(p0, p1)
-        b = dist(p1, p2)
-        c = dist(p2, p0)
-
-        s = (a + b + c) / 2.0
-        area = math.sqrt(max(s * (s - a) * (s - b) * (s - c), 0.0))  # Heron's formula
-
-        if area == 0 or a * b * c == 0:
-            return 0.0
-
-        return (4 * area) / (a * b * c)
-
-    def compute_steering_angle(self, lookahead_point, lookahead_distance):
-        lx, ly = self.transform_to_vehicle_frame(lookahead_point, self.current_pose)
-        if lx <= 0.0:
-            return 0.0
-        curvature = (2 * ly) / (lookahead_distance ** 2)
-        angle_rad = math.atan(curvature * self.wheelbase)
-        angle_deg = math.degrees(angle_rad)
-
-        # Clamp the steering angle to be between -45° and +45°
-        angle_deg = max(-45.0, min(45.0, angle_deg))
-        return angle_deg
-
-    def compute_adaptive_speed(self, curvature):
-        return max(self.min_speed, self.max_speed * math.exp(-self.k * curvature))
+    def prune_path(self):
+        """Prune waypoints behind the vehicle from the path."""
+        if not self.path or not self.ego_pose:
+            return
+        ego_x = self.ego_pose.position.x
+        ego_y = self.ego_pose.position.y
+        q = self.ego_pose.orientation
+        yaw = quaternion_to_yaw(q)
+        new_path = []
+        for wp in self.path:
+            dx = wp.pose.position.x - ego_x
+            dy = wp.pose.position.y - ego_y
+            x_r = math.cos(-yaw) * dx - math.sin(-yaw) * dy
+            if x_r > -0.5:
+                new_path.append(wp)
+        self.path = new_path
 
     def control_loop(self):
-        if self.current_pose is None or len(self.path_points) < 3:
+        """Main control loop for trajectory planning and student publishing."""
+        if self.loop_stopped:
             return
 
-        # Compute dynamic lookahead distance based on current velocity
-        lookahead_distance = self.base_ld + self.ld_gain * self.current_velocity
-        lookahead = self.find_lookahead_point(lookahead_distance)
+        missing = []
+        if self.ego_pose is None:
+            missing.append('ego_pose')
+        if self.ego_twist is None:
+            missing.append('ego_twist')
+        if not self.path:
+            missing.append('path_data')
 
-        if lookahead is None:
-            self.publish_stop()
+        if missing:
+            if not self.missing_input_warned:
+                self.get_logger().warn(
+                    f"check your inputs buddy (s): {', '.join(missing)}"
+                )
+                self.missing_input_warned = True
             return
 
-        try:
-            current = self.current_pose.position
-            next_idx = self.path_points.index(next(p for p in self.path_points if p.position == lookahead))
-            p0 = current
-            p1 = lookahead
-            p2 = self.path_points[min(next_idx + 5, len(self.path_points) - 1)].position
-            curvature = self.estimate_curvature(p0, p1, p2)
-        except Exception as e:
-            self.get_logger().warn(f"Curvature estimation failed: {e}")
-            curvature = 0.0
+        self.missing_input_warned = False
+        self.prune_path()
 
-        # Print the curvature to check its value
-        self.get_logger().info(f"Curvature: {curvature:.4f}")
+        if not self.path:
+            self.get_logger().warn(
+                "All path points are behind the vehicle. Stopping and requesting new path."
+            )
+            self.publish_velocity(0.0, 0.0)
+            self.loop_stopped = True
+            return
 
-        # Calculate speed and steering angle
-        speed = self.compute_adaptive_speed(curvature)
-        steering_angle_deg = self.compute_steering_angle(lookahead, lookahead_distance)
+        goal_pose = self.path[-1].pose
+        ego_x = self.ego_pose.position.x
+        ego_y = self.ego_pose.position.y
+        goal_x = goal_pose.position.x
+        goal_y = goal_pose.position.y
+        goal_distance = math.hypot(ego_x - goal_x, ego_y - goal_y)
+        end_threshold = 0.5  # meters
 
-        # Create AckermannDrive message
-        cmd = AckermannDrive()
-        cmd.speed = speed
-        cmd.steering_angle = steering_angle_deg  # in degrees
-        self.drive_pub.publish(cmd)
+        at_endpoint = goal_distance < end_threshold
 
-        # Print the command to terminal
-        self.get_logger().info(f"Ackermann Command => Speed: {cmd.speed:.2f} m/s, Steering Angle: {cmd.steering_angle:.2f} deg")
+        # Only publish when newly arriving at the endpoint (not already there)
+        if (self.ready_to_publish_student
+                and not self.student_published_for_this_path
+                and self.student_publish_index < len(self.student_list)
+                and at_endpoint
+                and not self.was_at_endpoint):
+            msg = String()
+            msg.data = self.student_list[self.student_publish_index]
+            self.student_location_pub.publish(msg)
+            self.get_logger().info(msg.data)  # print in terminal as per your requirement
 
-    def publish_stop(self):
-        cmd = AckermannDrive()
-        cmd.speed = 0.0
-        cmd.steering_angle = 0.0
-        self.get_logger().info("Stopping vehicle at final waypoint.")
-        self.drive_pub.publish(cmd)
+            self.student_publish_index += 1
+            self.student_published_for_this_path = True
+            self.ready_to_publish_student = False
 
+            # Optionally, publish the reached pose for multi-goal planner
+            reached_pose = PoseStamped()
+            reached_pose.header.stamp = self.get_clock().now().to_msg()
+            reached_pose.header.frame_id = "map"
+            reached_pose.pose = goal_pose
+            self.student_reached_pub.publish(reached_pose)
+
+        # Update the endpoint status for the next control loop
+        self.was_at_endpoint = at_endpoint
+
+        # --- normal stopping logic after reaching endpoint ---
+        if goal_distance < end_threshold:
+            self.publish_velocity(0.0, 0.0)
+            self.loop_stopped = True
+            return
+
+        if self.obstacle_detected:
+            self.publish_velocity(0.0, 0.0)
+            return
+
+        if self.vehicle_state.strip() == "Boarding":
+            self.publish_velocity(0.0, 0.0)
+            return
+
+        if self.vehicle_state.strip() != "Driving":
+            self.publish_velocity(0.0, 0.0)
+            return
+
+        # --- Steering and speed logic ---
+        steering_angle_deg, _ = self.pure_pursuit_steering()
+        abs_steer = min(abs(steering_angle_deg), self.max_steering_angle_deg)
+        speed_range = self.max_speed - self.min_speed
+        target_speed = self.max_speed - (abs_steer / self.max_steering_angle_deg) * speed_range
+        target_speed = max(self.min_speed, min(target_speed, self.max_speed))
+
+        self.publish_velocity(target_speed, -steering_angle_deg)
+
+    def pure_pursuit_steering(self):
+        """Compute pure pursuit steering angle based on the path and ego pose."""
+        if not self.path or not self.ego_pose:
+            return 0.0, False
+
+        ego_x = self.ego_pose.position.x
+        ego_y = self.ego_pose.position.y
+        q = self.ego_pose.orientation
+        yaw = quaternion_to_yaw(q)
+
+        lookahead_point = None
+        min_dist_diff = float('inf')
+        closest_idx = -1
+        for i in range(len(self.path) - 1):
+            wp1 = self.path[i].pose.position
+            wp2 = self.path[i + 1].pose.position
+            dx1, dy1 = wp1.x - ego_x, wp1.y - ego_y
+            dx2, dy2 = wp2.x - ego_x, wp2.y - ego_y
+            d1 = math.hypot(dx1, dy1)
+            d2 = math.hypot(dx2, dy2)
+            if (d1 < self.lookahead_distance <= d2) or (d2 < self.lookahead_distance <= d1):
+                ratio = ((self.lookahead_distance - d1) / (d2 - d1)) if (d2 != d1) else 0
+                lx = wp1.x + ratio * (wp2.x - wp1.x)
+                ly = wp1.y + ratio * (wp2.y - wp1.y)
+                lookahead_point = (lx, ly)
+                break
+            dist_diff = abs(self.lookahead_distance - d1)
+            if dist_diff < min_dist_diff:
+                min_dist_diff = dist_diff
+                closest_idx = i
+
+        if lookahead_point is None:
+            if closest_idx >= 0:
+                wp = self.path[closest_idx].pose.position
+                lookahead_point = (wp.x, wp.y)
+            else:
+                wp = self.path[-1].pose.position
+                lookahead_point = (wp.x, wp.y)
+
+        dx = lookahead_point[0] - ego_x
+        dy = lookahead_point[1] - ego_y
+        x_r = math.cos(-yaw) * dx - math.sin(-yaw) * dy
+        y_r = math.sin(-yaw) * dx + math.cos(-yaw) * dy
+
+        if x_r <= 0:
+            self.get_logger().warn(
+                "Lookahead point is behind the vehicle. Stopping and requesting new path."
+            )
+            return 0.0, False
+
+        wheelbase = self.wheelbase
+        ld = math.hypot(x_r, y_r)
+        if ld < 1e-3:
+            return 0.0, False
+        curvature = (2 * y_r) / (ld * ld)
+        steering_angle_rad = math.atan(wheelbase * curvature)
+        steering_angle_deg = math.degrees(steering_angle_rad)
+
+        self.smoothed_steering_angle = (
+            (1 - self.steering_smoothing_factor) * self.smoothed_steering_angle
+            + self.steering_smoothing_factor * steering_angle_deg
+        )
+
+        saturated = False
+        if self.smoothed_steering_angle > self.max_steering_angle_deg:
+            saturated = True
+            self.smoothed_steering_angle = self.max_steering_angle_deg
+        elif self.smoothed_steering_angle < -self.max_steering_angle_deg:
+            saturated = True
+            self.smoothed_steering_angle = -self.max_steering_angle_deg
+
+        return self.smoothed_steering_angle, saturated
+
+    def publish_velocity(self, speed, steering_angle_deg=0.0):
+        """Publish Ackermann drive command with limited and offset steering angle."""
+        if steering_angle_deg > 0:
+            steering_angle_deg += self.steering_offset_deg
+        elif steering_angle_deg < 0:
+            steering_angle_deg -= self.steering_offset_deg
+        steering_angle_deg = max(
+            -self.max_steering_angle_deg, min(steering_angle_deg, self.max_steering_angle_deg)
+        )
+        drive_msg = AckermannDrive()
+        drive_msg.speed = float(speed)
+        drive_msg.steering_angle = float(steering_angle_deg)
+        drive_msg.steering_angle_velocity = 0.0
+        drive_msg.acceleration = 0.0
+        drive_msg.jerk = 0.0
+        self.drive_pub.publish(drive_msg)
+
+        if not self.loop_stopped:
+            self.get_logger().info(
+                "[DRIVE] speed: %.2f m/s | steering_angle: %.2f deg", speed, steering_angle_deg
+            )
 
 def main(args=None):
+    """Main entry point for the trajectory planner node."""
     rclpy.init(args=args)
     node = TrajectoryPlanner()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
