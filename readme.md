@@ -69,7 +69,7 @@ AC2: If obstacle_detected is True, the trajectory planner must publish an Ackerm
 
 AC3: If the vehicle_state is not "Driving", the trajectory planner must publish an Ackermann_drive message with speed = 0 and steering_angle = 0 to stop the vehicle immediately.
 
-AC4: The trajectory planner component must subscribe to the /path_data topic to receive a sequence of path waypoints, and use these waypoints along with the current vehicle pose to compute steering and speed commands using a pure pursuit algorithm. The steering angle must be limited according to max_steering_angle_deg and offset by steering_offset_deg. Speed must be dynamically adjusted based on the steering angle, remaining within [min_speed, max_speed].
+AC4: The trajectory planner component must dynamically adjust the vehicle's speed based on the computed steering angle, such that sharper steering results in lower speeds and smaller steering angles allow higher speeds. The speed must always remain within the range defined by min_speed and max_speed.
 
 AC5: When the vehicle has reached the endpoint of the path, the trajectory planner component must publish an Ackermann_drive message with speed = 0 and steering_angle = 0 to stop the vehicle immediately.
 
