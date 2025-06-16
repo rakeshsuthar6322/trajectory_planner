@@ -33,8 +33,7 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 
 | **Topic**                   | **Input/Output** | **Message Type**               | *Description**                                                  |
 |----------------------------|---------|---------------------------------|------------------------------------------------------------------|
-| `/ego_pose`                | Input   | `geometry_msgs/PoseStamped`     | Current position and orientation of the vehicle.                 |
-| `/ego_twist`               | Input   | `geometry_msgs/TwistStamped`    | Current velocity (linear & angular) of the vehicle.              |
+| `/odom`                    | Input   | `geometry_msgs/TwistStamped`    | Current pose and orientation.             |
 | `/path_data`               | Input   | `nav_msgs/Path`                 | Path that the vehicle is expected to follow.                     |
 | `/obstacle_detected`       | Input   | `std_msgs/Bool`                 | Signals if an obstacle is detected in the path.                  |
 | `/vehicle_state`           | Input   | `std_msgs/String`               | Vehicle state: "Idle","Driving","Boarding","Drop-Off"            |
