@@ -82,6 +82,7 @@ AC8: The vehicle must come to a full stop (speed = 0) and log a warning message 
 AC9: The system must log a "Ready to Drive" message only when all required initial sensor inputs (/odom, /path_data) are actively being received. If any critical input becomes unavailable for more than 1 second, the system must log a "Waiting for essential input data" warning and publish a halt command.
 
 AC10: When the control algorithm switches (e.g., from Pure Pursuit to DWA, or upon resuming from a halt), the commanded speed and steering_angle must transition smoothly, without sudden, large, or jerky changes in consecutive commands.
+
 ---
 
 ## Installation
