@@ -1,3 +1,10 @@
+# File: ~/pitch_6/src/TheElite_trajectory_planner/test/__init__.py
+# (This file should be empty but must exist)
+
+# File: ~/pitch_6/src/TheElite_trajectory_planner/test/unit/__init__.py  
+# (This file should be empty but must exist)
+
+# File: ~/pitch_6/src/TheElite_trajectory_planner/test/unit/test_tp_planner.py
 import unittest
 import math
 import sys
@@ -5,6 +12,10 @@ import os
 from unittest.mock import Mock, patch, MagicMock
 import numpy as np
 from enum import Enum
+
+# Add the project root to Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 # --- Mock ROS Environment and Messages ---
 class MockPoint:
@@ -110,206 +121,221 @@ class MockNode:
         self.get_clock = MagicMock(return_value=MockClock())
 
 # Set up comprehensive mocking before any imports
-sys.modules['rclpy'] = MagicMock()
-sys.modules['rclpy.node'] = MagicMock()
-sys.modules['rclpy.exceptions'] = MagicMock()
-sys.modules['geometry_msgs'] = MagicMock()
-sys.modules['geometry_msgs.msg'] = MagicMock()
-sys.modules['nav_msgs'] = MagicMock()
-sys.modules['nav_msgs.msg'] = MagicMock()
-sys.modules['std_msgs'] = MagicMock()
-sys.modules['std_msgs.msg'] = MagicMock()
-sys.modules['ackermann_msgs'] = MagicMock()
-sys.modules['ackermann_msgs.msg'] = MagicMock()
-sys.modules['visualization_msgs'] = MagicMock()
-sys.modules['visualization_msgs.msg'] = MagicMock()
+mock_modules = {
+    'rclpy': MagicMock(),
+    'rclpy.node': MagicMock(),
+    'rclpy.exceptions': MagicMock(),
+    'geometry_msgs': MagicMock(),
+    'geometry_msgs.msg': MagicMock(),
+    'nav_msgs': MagicMock(),
+    'nav_msgs.msg': MagicMock(),
+    'std_msgs': MagicMock(),
+    'std_msgs.msg': MagicMock(),
+    'ackermann_msgs': MagicMock(),
+    'ackermann_msgs.msg': MagicMock(),
+    'visualization_msgs': MagicMock(),
+    'visualization_msgs.msg': MagicMock(),
+}
+
+for module_name, mock_module in mock_modules.items():
+    sys.modules[module_name] = mock_module
 
 # Mock rclpy functions
 import rclpy
 rclpy.init = MagicMock()
 rclpy.shutdown = MagicMock()
 
-# Patch the Node class globally
-with patch('rclpy.node.Node', MockNode):
+# Import attempt with fallback
+TrajectoryPlanner = None
+USING_REAL_PLANNER = False
+
+# Try multiple import paths
+import_attempts = [
+    'tp_package.tp_planner',
+    'TheElite_trajectory_planner.tp_package.tp_planner',
+]
+
+for import_path in import_attempts:
     try:
-        # Try to import the real TrajectoryPlanner
-        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-        from tp_package.tp_planner import TrajectoryPlanner
-        USING_REAL_PLANNER = True
+        with patch('rclpy.node.Node', MockNode):
+            module = __import__(import_path, fromlist=['TrajectoryPlanner'])
+            TrajectoryPlanner = getattr(module, 'TrajectoryPlanner')
+            USING_REAL_PLANNER = True
+            
+            # Try to get OvertakePhase from the real module
+            try:
+                OvertakePhase = getattr(module, 'OvertakePhase')
+            except AttributeError:
+                pass  # Use our mock OvertakePhase
+            break
+    except (ImportError, AttributeError) as e:
+        continue
+
+# If no real planner found, create mock
+if TrajectoryPlanner is None:
+    class TrajectoryPlanner(MockNode):
+        def __init__(self):
+            super().__init__('trajectory_planner')
+            
+            # Initialize all required attributes
+            self.ego_pose = None
+            self.ego_twist = None
+            self.peer_ego_pose = None
+            self.obstacle_detected = False
+            self.vehicle_state = "Driving"
+            self.is_overtaking = False
+            self.current_overtake_phase = OvertakePhase.NORMAL_DRIVING
+            self.cruising_distance_completed = 0.0
+            self.last_ego_position = (0.0, 0.0)
+            self.loop_stopped = False
+            self.missing_input_warned = False
+            self.smoothed_steering_angle = 0.0
+            self.path = []
+            
+            # Vehicle parameters
+            self.wheelbase = 0.3302
+            self.overtake_cruising_length = 3.0
+            self.max_linear_accel = 2.0
+            self.dt = 0.1
+            self.max_steering_angle_deg = 30.0
+            self.steering_smoothing_factor = 0.1
+            self.trigger_distance = 1.5
+            
+            # Mock publishers
+            self.drive_pub = MagicMock()
+            self.student_location_pub = MagicMock()
+            self.student_reached_pub = MagicMock()
+            self.marker_pub = MagicMock()
         
-        # Check if OvertakePhase exists in the module
-        try:
-            from tp_package.tp_planner import OvertakePhase as RealOvertakePhase
-            OvertakePhase = RealOvertakePhase
-        except ImportError:
-            pass  # Use our mock OvertakePhase
-            
-    except ImportError:
-        USING_REAL_PLANNER = False
+        def path_callback(self, msg):
+            self.path = msg.poses
         
-        # Create a comprehensive mock TrajectoryPlanner
-        class TrajectoryPlanner(MockNode):
-            def __init__(self):
-                super().__init__('trajectory_planner')
-                
-                # Initialize all required attributes
-                self.ego_pose = None
-                self.ego_twist = None
-                self.peer_ego_pose = None
-                self.obstacle_detected = False
-                self.vehicle_state = "Driving"
-                self.is_overtaking = False
-                self.current_overtake_phase = OvertakePhase.NORMAL_DRIVING
-                self.cruising_distance_completed = 0.0
-                self.last_ego_position = (0.0, 0.0)
-                self.loop_stopped = False
-                self.missing_input_warned = False
-                self.smoothed_steering_angle = 0.0
-                self.path = []
-                
-                # Vehicle parameters
-                self.wheelbase = 0.3302
-                self.overtake_cruising_length = 3.0
-                self.max_linear_accel = 2.0
-                self.dt = 0.1
-                self.max_steering_angle_deg = 30.0
-                self.steering_smoothing_factor = 0.1
-                self.trigger_distance = 1.5
-                
-                # Mock publishers
-                self.drive_pub = MagicMock()
-                self.student_location_pub = MagicMock()
-                self.student_reached_pub = MagicMock()
-                self.marker_pub = MagicMock()
+        def peer_odom_callback(self, msg):
+            self.peer_ego_pose = msg.pose.pose
+        
+        def obstacle_callback(self, msg):
+            self.obstacle_detected = msg.data
+        
+        def state_callback(self, msg):
+            self.vehicle_state = msg.data
+        
+        def control_loop(self):
+            # Handle missing inputs
+            if self.ego_pose is None:
+                self.missing_input_warned = True
+                self.get_logger().warn("Missing inputs: ego_pose")
+                self._publish_stop_command()
+                return
             
-            def path_callback(self, msg):
-                self.path = msg.poses
+            # Handle obstacle or non-driving state
+            if self.obstacle_detected or self.vehicle_state != "Driving":
+                self.loop_stopped = True
+                self._publish_stop_command()
+                return
             
-            def peer_odom_callback(self, msg):
-                self.peer_ego_pose = msg.pose.pose
+            # Check for overtaking initiation
+            if not self.is_overtaking and self.peer_ego_pose:
+                peer_distance = self._calculate_distance(
+                    self.peer_ego_pose.position, self.ego_pose.position
+                )
+                if peer_distance <= self.trigger_distance:
+                    self.is_overtaking = True
+                    self.current_overtake_phase = OvertakePhase.LANE_CHANGE_DEPARTURE
+                    self.cruising_distance_completed = 0.0
+                    self.get_logger().info("Starting overtake maneuver")
             
-            def obstacle_callback(self, msg):
-                self.obstacle_detected = msg.data
-            
-            def state_callback(self, msg):
-                self.vehicle_state = msg.data
-            
-            def control_loop(self):
-                # Handle missing inputs
-                if self.ego_pose is None:
-                    self.missing_input_warned = True
-                    self.get_logger().warn("Missing inputs: ego_pose")
-                    self._publish_stop_command()
-                    return
-                
-                # Handle obstacle or non-driving state
-                if self.obstacle_detected or self.vehicle_state != "Driving":
-                    self.loop_stopped = True
-                    self._publish_stop_command()
-                    return
-                
-                # Check for overtaking initiation
-                if not self.is_overtaking and self.peer_ego_pose:
+            # Update overtaking phase
+            if self.is_overtaking:
+                if self.peer_ego_pose:
                     peer_distance = self._calculate_distance(
                         self.peer_ego_pose.position, self.ego_pose.position
                     )
-                    if peer_distance <= self.trigger_distance:
-                        self.is_overtaking = True
-                        self.current_overtake_phase = OvertakePhase.LANE_CHANGE_DEPARTURE
-                        self.cruising_distance_completed = 0.0
-                        self.get_logger().info("Starting overtake maneuver")
+                    self.update_overtaking_phase(peer_distance)
                 
-                # Update overtaking phase
-                if self.is_overtaking:
-                    if self.peer_ego_pose:
-                        peer_distance = self._calculate_distance(
-                            self.peer_ego_pose.position, self.ego_pose.position
-                        )
-                        self.update_overtaking_phase(peer_distance)
-                    
-                    # Check for overtaking completion
-                    if self.current_overtake_phase == OvertakePhase.LANE_CHANGE_RETURN and not self.peer_ego_pose:
-                        self.is_overtaking = False
-                        self.current_overtake_phase = OvertakePhase.NORMAL_DRIVING
-                        self.get_logger().info("Overtaking complete - returning to Pure Pursuit")
+                # Check for overtaking completion
+                if self.current_overtake_phase == OvertakePhase.LANE_CHANGE_RETURN and not self.peer_ego_pose:
+                    self.is_overtaking = False
+                    self.current_overtake_phase = OvertakePhase.NORMAL_DRIVING
+                    self.get_logger().info("Overtaking complete - returning to Pure Pursuit")
+            
+            # Generate control commands
+            self._publish_control_command()
+        
+        def update_overtaking_phase(self, peer_distance):
+            if self.current_overtake_phase == OvertakePhase.LANE_CHANGE_DEPARTURE:
+                self.current_overtake_phase = OvertakePhase.PASSING_PHASE
+            
+            if self.current_overtake_phase == OvertakePhase.PASSING_PHASE:
+                # Update cruising distance
+                current_pos = (self.ego_pose.position.x, self.ego_pose.position.y)
+                if hasattr(self, 'last_ego_position') and self.last_ego_position:
+                    distance_traveled = self._calculate_distance_2d(
+                        current_pos, self.last_ego_position
+                    )
+                    self.cruising_distance_completed += distance_traveled
+                self.last_ego_position = current_pos
                 
-                # Generate control commands
-                self._publish_control_command()
+                # Check if cruising is complete and peer is behind
+                if (self.cruising_distance_completed >= self.overtake_cruising_length and 
+                    peer_distance > 1.0):
+                    self.current_overtake_phase = OvertakePhase.LANE_CHANGE_RETURN
+        
+        def generate_dwa_trajectory(self, current_v, current_w):
+            # Mock DWA implementation with lateral offset
+            target_v = 0.8  # slightly higher speed for overtaking
+            if self.current_overtake_phase == OvertakePhase.LANE_CHANGE_DEPARTURE:
+                target_w = 0.5  # turn left
+            elif self.current_overtake_phase == OvertakePhase.PASSING_PHASE:
+                target_w = 0.0  # go straight
+            else:  # LANE_CHANGE_RETURN
+                target_w = -0.3  # turn right
+            return target_v, target_w
+        
+        def pure_pursuit_steering(self):
+            return (10.0, False)  # Mock steering angle and reached flag
+        
+        def get_overtaking_target(self, ego_pos, ego_yaw):
+            # Mock lateral offset calculation
+            lateral_offset = 1.5  # meters to the left
+            target_x = ego_pos.x + 2.0 * math.cos(ego_yaw)
+            target_y = ego_pos.y + lateral_offset + 2.0 * math.sin(ego_yaw)
+            return target_x, target_y
+        
+        def quaternion_to_yaw(self, quaternion):
+            return 0.0  # Mock yaw calculation
+        
+        def _calculate_distance(self, pos1, pos2):
+            return math.sqrt((pos1.x - pos2.x)**2 + (pos1.y - pos2.y)**2)
+        
+        def _calculate_distance_2d(self, pos1, pos2):
+            return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
+        
+        def _publish_stop_command(self):
+            msg = MockAckermannDriveStamped()
+            msg.drive.speed = 0.0
+            msg.drive.steering_angle = 0.0
+            self.drive_pub.publish(msg)
+        
+        def _publish_control_command(self):
+            msg = MockAckermannDriveStamped()
+            if self.is_overtaking:
+                target_v, target_w = self.generate_dwa_trajectory(0.5, 0.0)
+                msg.drive.speed = target_v
+                msg.drive.steering_angle = math.atan(self.wheelbase * target_w / target_v) if target_v > 0 else 0
+            else:
+                steering_angle, _ = self.pure_pursuit_steering()
+                msg.drive.speed = 1.0
+                msg.drive.steering_angle = math.radians(steering_angle)
             
-            def update_overtaking_phase(self, peer_distance):
-                if self.current_overtake_phase == OvertakePhase.LANE_CHANGE_DEPARTURE:
-                    self.current_overtake_phase = OvertakePhase.PASSING_PHASE
-                
-                if self.current_overtake_phase == OvertakePhase.PASSING_PHASE:
-                    # Update cruising distance
-                    current_pos = (self.ego_pose.position.x, self.ego_pose.position.y)
-                    if hasattr(self, 'last_ego_position') and self.last_ego_position:
-                        distance_traveled = self._calculate_distance_2d(
-                            current_pos, self.last_ego_position
-                        )
-                        self.cruising_distance_completed += distance_traveled
-                    self.last_ego_position = current_pos
-                    
-                    # Check if cruising is complete and peer is behind
-                    if (self.cruising_distance_completed >= self.overtake_cruising_length and 
-                        peer_distance > 1.0):
-                        self.current_overtake_phase = OvertakePhase.LANE_CHANGE_RETURN
-            
-            def generate_dwa_trajectory(self, current_v, current_w):
-                # Mock DWA implementation with lateral offset
-                target_v = 0.8  # slightly higher speed for overtaking
-                if self.current_overtake_phase == OvertakePhase.LANE_CHANGE_DEPARTURE:
-                    target_w = 0.5  # turn left
-                elif self.current_overtake_phase == OvertakePhase.PASSING_PHASE:
-                    target_w = 0.0  # go straight
-                else:  # LANE_CHANGE_RETURN
-                    target_w = -0.3  # turn right
-                return target_v, target_w
-            
-            def pure_pursuit_steering(self):
-                return (10.0, False)  # Mock steering angle and reached flag
-            
-            def get_overtaking_target(self, ego_pos, ego_yaw):
-                # Mock lateral offset calculation
-                lateral_offset = 1.5  # meters to the left
-                target_x = ego_pos.x + 2.0 * math.cos(ego_yaw)
-                target_y = ego_pos.y + lateral_offset + 2.0 * math.sin(ego_yaw)
-                return target_x, target_y
-            
-            def quaternion_to_yaw(self, quaternion):
-                return 0.0  # Mock yaw calculation
-            
-            def _calculate_distance(self, pos1, pos2):
-                return math.sqrt((pos1.x - pos2.x)**2 + (pos1.y - pos2.y)**2)
-            
-            def _calculate_distance_2d(self, pos1, pos2):
-                return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
-            
-            def _publish_stop_command(self):
-                msg = MockAckermannDriveStamped()
-                msg.drive.speed = 0.0
-                msg.drive.steering_angle = 0.0
-                self.drive_pub.publish(msg)
-            
-            def _publish_control_command(self):
-                msg = MockAckermannDriveStamped()
-                if self.is_overtaking:
-                    target_v, target_w = self.generate_dwa_trajectory(0.5, 0.0)
-                    msg.drive.speed = target_v
-                    msg.drive.steering_angle = math.atan(self.wheelbase * target_w / target_v) if target_v > 0 else 0
-                else:
-                    steering_angle, _ = self.pure_pursuit_steering()
-                    msg.drive.speed = 1.0
-                    msg.drive.steering_angle = math.radians(steering_angle)
-                
-                self.drive_pub.publish(msg)
+            self.drive_pub.publish(msg)
 
 class TestTrajectoryPlanner(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Class-level setup that runs once before all tests"""
         # Initialize rclpy mock (required for some tests)
-        rclpy.init()
+        if rclpy.init:
+            rclpy.init()
 
     def setUp(self):
         """Test-level setup that runs before each test"""

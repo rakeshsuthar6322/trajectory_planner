@@ -1,0 +1,17 @@
+# Core testing dependencies
+unittest2>=1.1.0
+numpy>=1.19.0
+mock>=4.0.0
+
+# Code quality analysis tools
+pylint>=2.12.0
+lizard>=1.17.0
+
+# Optional: For better test reporting
+coverage>=6.0
+pytest>=6.0.0
+pytest-cov>=3.0.0
+
+# ROS2 message type alternatives (for mocking)
+# These are not actual ROS2 packages but help with type definitions
+attrs>=21.0.0
