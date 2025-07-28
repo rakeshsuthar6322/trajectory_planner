@@ -11,7 +11,7 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 ---
 
 <div align="center">
-    <img src="Images/tp_image.jpg" height=500, width=800>
+    <img src="images/image.png" height=500, width=800>
 </div>
 
 ---
@@ -43,7 +43,7 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 ## RQT_graph
 ---
 <div align="center">
-    <img src="Images/Rqt_pic.png" height=500, width=800>
+    <img src="images/rqt_graph.png" height=500, width=800>
 </div>
 ---
 
