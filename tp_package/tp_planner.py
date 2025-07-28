@@ -9,6 +9,7 @@ import math
 import numpy as np
 from enum import Enum
 
+# Defines the explicit states for the overtaking maneuver, as required by AC2, AC4, and AC5.
 class OvertakePhase(Enum):
     NORMAL_DRIVING = 0
     LANE_CHANGE_DEPARTURE = 1
@@ -26,6 +27,7 @@ class TrajectoryPlanner(Node):
         self.path = []
         self.obstacle_detected = False
         self.vehicle_state = "Idle"
+        # AC2, AC5: Flags to manage the overtaking state. Initialized to NORMAL_DRIVING.
         self.current_overtake_phase = OvertakePhase.NORMAL_DRIVING
         self.is_overtaking = False
         
@@ -42,6 +44,7 @@ class TrajectoryPlanner(Node):
         self.max_steering_angle_deg = 30.0
         self.lookahead_distance = 0.7
         self.wheelbase = 0.50
+        # AC10: A smoothing factor to ensure steering commands transition smoothly.
         self.steering_smoothing_factor = 0.2
         self.smoothed_steering_angle = 0.0
         self.steering_offset_deg = 4.0
@@ -51,16 +54,19 @@ class TrajectoryPlanner(Node):
         self.ego_length = 0.83
         self.ego_width = 0.38
         
-        # Overtaking parameters
+        # Overtaking parameters based on Acceptance Criteria
+        # AC1: The distance at which an overtaking maneuver is triggered.
         self.overtake_trigger_distance = 1.50
+        # AC3: Defines the lateral target offset for the DWA planner during overtaking.
         self.overtake_target_lateral_offset = 0.35
+        # AC3: The minimum distance the vehicle must travel alongside the obstacle before merging.
         self.overtake_cruising_length = 3.0
         self.overtake_merge_safety_distance = 2.0
         self.cruising_distance_completed = 0.0
         self.last_ego_position = None
         self.peer_is_behind = False
         
-        # DWA parameters
+        # AC7: DWA parameters are used exclusively for the overtaking maneuver.
         self.max_linear_vel = self.max_speed
         self.max_angular_vel = math.radians(30.0)
         self.max_linear_accel = 0.5
@@ -72,19 +78,25 @@ class TrajectoryPlanner(Node):
         
         # Control flags
         self.loop_stopped = False
+        # AC9: Flag to ensure the "missing input" warning is logged only once.
         self.missing_input_warned = False
         
         # Publishers
+        # AC6: Publishes the final calculated AckermannDrive commands.
         self.drive_pub = self.create_publisher(AckermannDrive, '/ackermann_drive', 10)
         self.student_location_pub = self.create_publisher(String, '/student_location', 10)
         self.student_reached_pub = self.create_publisher(PoseStamped, '/student_reached', 10)
         self.marker_pub = self.create_publisher(MarkerArray, '/visualization_marker_array', 10)
         
         # Subscribers
+        # AC9: Subscribes to essential input data required for operation.
         self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
         self.create_subscription(Path, '/path_data', self.path_callback, 10)
+        # AC8: Subscribes to the obstacle detection flag to trigger a stop.
         self.create_subscription(Bool, '/obstacle_detected', self.obstacle_callback, 10)
+        # AC8: Subscribes to the vehicle state to trigger a stop if not "Driving".
         self.create_subscription(String, '/vehicle_state', self.state_callback, 10)
+        # AC1: Subscribes to peer vehicle data to detect obstacles for overtaking.
         self.create_subscription(Odometry, '/peer_veh_behavior', self.peer_odom_callback, 10)
         
         # Control loop timer (50 Hz)
@@ -122,6 +134,7 @@ class TrajectoryPlanner(Node):
         self.ego_pose.position.y += wheelbase_half * math.sin(yaw)
     
     def peer_odom_callback(self, msg):
+        # Receives data for the peer vehicle, used to trigger overtaking (AC1).
         self.peer_ego_pose = msg.pose.pose
     
     def path_callback(self, msg):
@@ -133,9 +146,11 @@ class TrajectoryPlanner(Node):
         self.get_logger().info(f"Received new path with {len(self.path)} waypoints.")
     
     def obstacle_callback(self, msg):
+        # AC8: Updates the obstacle flag, which is checked in the control loop to stop the vehicle.
         self.obstacle_detected = msg.data
     
     def state_callback(self, msg):
+        # AC8: Updates the vehicle state, which is checked in the control loop to stop the vehicle.
         self.vehicle_state = msg.data
     
     def prune_path(self):
@@ -156,6 +171,7 @@ class TrajectoryPlanner(Node):
                 new_path.append(wp)
         self.path = new_path
     
+    # AC7: This function implements the Pure Pursuit algorithm for normal driving.
     def pure_pursuit_steering(self):
         """Calculate steering angle using Pure Pursuit algorithm"""
         if not self.path or not self.ego_pose:
@@ -185,9 +201,9 @@ class TrajectoryPlanner(Node):
         steering_angle_rad = math.atan(self.wheelbase * curvature)
         steering_angle_deg = math.degrees(steering_angle_rad)
         
-        # Apply smoothing and saturation
+        # AC10: Applies exponential smoothing to the steering angle to prevent jerky movements.
         self.smoothed_steering_angle = ((1 - self.steering_smoothing_factor) * self.smoothed_steering_angle 
-                                       + self.steering_smoothing_factor * steering_angle_deg)
+                                        + self.steering_smoothing_factor * steering_angle_deg)
         
         saturated = abs(self.smoothed_steering_angle) > self.max_steering_angle_deg
         if saturated:
@@ -226,6 +242,7 @@ class TrajectoryPlanner(Node):
             wp = self.path[-1].pose.position
         return (wp.x, wp.y)
     
+    # AC7: This function and its helpers implement the DWA algorithm, used exclusively for overtaking.
     def generate_dwa_trajectory(self, current_v, current_w):
         """Generate and evaluate DWA trajectories for overtaking"""
         # Dynamic window constraints
@@ -253,6 +270,8 @@ class TrajectoryPlanner(Node):
         
         return best_v, best_w
     
+    # AC3: This function calculates the target point for the DWA planner, which includes
+    # a lateral offset to steer the vehicle away from the obstacle.
     def get_overtaking_target(self, ego_pos, ego_yaw):
         """Get target position for overtaking based on current phase"""
         if self.current_overtake_phase in [OvertakePhase.LANE_CHANGE_DEPARTURE, OvertakePhase.PASSING_PHASE]:
@@ -277,11 +296,11 @@ class TrajectoryPlanner(Node):
                 path_weight, avoidance_weight = 0.5, 0.5
             
             target_x = (path_weight * path_target[0] + 
-                       avoidance_weight * (ego_pos.x + avoidance_x * self.overtake_target_lateral_offset))
+                        avoidance_weight * (ego_pos.x + avoidance_x * self.overtake_target_lateral_offset))
             target_y = (path_weight * path_target[1] + 
-                       avoidance_weight * (ego_pos.y + avoidance_y * self.overtake_target_lateral_offset))
+                        avoidance_weight * (ego_pos.y + avoidance_y * self.overtake_target_lateral_offset))
         else:
-            # LANE_CHANGE_RETURN: Return to path
+            # AC4: When in LANE_CHANGE_RETURN phase, the target is to merge back to the original path.
             target_x, target_y = self.find_closest_path_point_ahead(ego_pos, ego_yaw)
             self.get_logger().info("MERGING BACK TO PATH")
         
@@ -328,6 +347,8 @@ class TrajectoryPlanner(Node):
         
         return target_x, target_y
     
+    # AC3, AC10: Evaluates potential DWA trajectories based on safety, speed, and path adherence
+    # to ensure a safe and smooth overtaking maneuver.
     def evaluate_trajectory_cost(self, v, w, target_x, target_y, ego_x, ego_y, ego_yaw):
         """Evaluate cost for a trajectory"""
         # Simulate trajectory
@@ -393,7 +414,7 @@ class TrajectoryPlanner(Node):
             return 0.0
         
         min_dist = min(math.hypot(final_x - wp.pose.position.x, final_y - wp.pose.position.y) 
-                      for wp in self.path)
+                       for wp in self.path)
         
         return min_dist * (1.5 if self.current_overtake_phase == OvertakePhase.LANE_CHANGE_RETURN else 0.3)
     
@@ -404,7 +425,7 @@ class TrajectoryPlanner(Node):
             steering_angle_deg += math.copysign(self.steering_offset_deg, steering_angle_deg)
         
         steering_angle_deg = max(-self.max_steering_angle_deg, 
-                               min(steering_angle_deg, self.max_steering_angle_deg))
+                                 min(steering_angle_deg, self.max_steering_angle_deg))
         
         drive_msg = AckermannDrive()
         drive_msg.speed = float(speed)
@@ -477,6 +498,7 @@ class TrajectoryPlanner(Node):
         self.was_at_endpoint = at_endpoint
         return at_endpoint
     
+    # This function implements the state machine logic for overtaking (AC2, AC3, AC4, AC5).
     def update_overtaking_phase(self, peer_distance):
         """Update overtaking phase based on peer position and distance"""
         ego_pos = self.ego_pose.position
@@ -490,11 +512,14 @@ class TrajectoryPlanner(Node):
         self.peer_is_behind = (peer_local_x < -0.5)
         
         # Phase management
+        # AC4: Checks if the vehicle has passed the obstacle and cruising is complete, then transitions to LANE_CHANGE_RETURN.
         if (self.peer_is_behind and self.cruising_distance_completed >= self.overtake_cruising_length 
             and peer_distance >= self.overtake_merge_safety_distance):
             self.current_overtake_phase = OvertakePhase.LANE_CHANGE_RETURN
+        # AC2: If the peer is not behind, the maneuver starts with LANE_CHANGE_DEPARTURE.
         elif not self.peer_is_behind:
             self.current_overtake_phase = OvertakePhase.LANE_CHANGE_DEPARTURE
+        # AC3: Once the vehicle starts pulling alongside, it enters the PASSING_PHASE.
         else:
             self.current_overtake_phase = OvertakePhase.PASSING_PHASE
         
@@ -504,10 +529,10 @@ class TrajectoryPlanner(Node):
             self.current_overtake_phase = OvertakePhase.LANE_CHANGE_RETURN
             self.get_logger().info("Forcing merge back - too far from path")
         
-        # Update cruising distance
+        # AC3: Tracks the distance traveled while passing the obstacle.
         if self.last_ego_position and self.peer_is_behind:
             distance_increment = math.hypot(ego_pos.x - self.last_ego_position[0], 
-                                          ego_pos.y - self.last_ego_position[1])
+                                            ego_pos.y - self.last_ego_position[1])
             self.cruising_distance_completed += distance_increment
         
         self.last_ego_position = (ego_pos.x, ego_pos.y)
@@ -519,16 +544,19 @@ class TrajectoryPlanner(Node):
         if self.loop_stopped:
             return
         
-        # Check essential inputs
+        # AC9: Checks for essential inputs and logs a warning if they are missing.
         missing = [name for name, value in [('ego_pose', self.ego_pose), ('ego_twist', self.ego_twist), 
-                                           ('path_data', self.path)] if not value]
+                                            ('path_data', self.path)] if not value]
         
         if missing:
             if not self.missing_input_warned:
+                # The log message could be changed to "Waiting for essential input data" as per AC9.
                 self.get_logger().warn(f"Missing inputs: {', '.join(missing)}")
                 self.missing_input_warned = True
             return
         else:
+            # AC9: Once inputs are received, the warning flag is cleared. A "Ready to Drive" message
+            # could be logged here upon first receiving all inputs.
             self.missing_input_warned = False
         
         # Prune path and handle goal management
@@ -540,11 +568,13 @@ class TrajectoryPlanner(Node):
         
         at_endpoint = self.handle_student_goals()
         
-        # Stopping conditions
+        # AC8: This block enforces stopping conditions. If an obstacle is detected or the
+        # vehicle state is not "Driving", it publishes a speed of 0.
         if at_endpoint or self.obstacle_detected or self.vehicle_state.strip() not in ["Driving"]:
             self.publish_velocity(0.0, 0.0)
             if at_endpoint:
                 self.loop_stopped = True
+            # AC5: Resets the overtake phase when stopping for any reason.
             self.current_overtake_phase = OvertakePhase.NORMAL_DRIVING
             self.is_overtaking = False
             return
@@ -554,16 +584,18 @@ class TrajectoryPlanner(Node):
         if self.peer_ego_pose:
             peer_distance = self.get_distance(self.ego_pose.position, self.peer_ego_pose.position)
         
-        # Control decision: DWA for overtaking, Pure Pursuit otherwise
+        # AC7: Control decision - switches between DWA and Pure Pursuit.
+        # AC1: Checks if the peer distance is within the trigger distance to start overtaking.
         if self.peer_ego_pose and peer_distance <= self.overtake_trigger_distance:
-            # Start overtaking if not already
+            # AC2: If not already overtaking, sets the flag to True and transitions the
+            # phase to LANE_CHANGE_DEPARTURE.
             if not self.is_overtaking:
                 self.is_overtaking = True
                 self.current_overtake_phase = OvertakePhase.LANE_CHANGE_DEPARTURE
                 self.cruising_distance_completed = 0.0
                 self.get_logger().info("Starting overtake maneuver")
             
-            # Update overtaking phase
+            # Update overtaking phase state machine
             self.update_overtaking_phase(peer_distance)
             
             # Use DWA for trajectory planning
@@ -573,12 +605,15 @@ class TrajectoryPlanner(Node):
             
             # Convert to steering angle
             steering_angle_deg = (math.degrees(math.atan(self.wheelbase * target_w / target_v)) 
-                                if abs(target_v) > 0.05 else 0.0)
+                                  if abs(target_v) > 0.05 else 0.0)
             
+            # AC6: Logs the drive commands during the DWA maneuver, effectively printing them.
             self.get_logger().info(f"DWA Overtaking: Phase={self.current_overtake_phase.name}, "
-                                 f"V={target_v:.2f}, Steer={steering_angle_deg:.2f}°")
+                                   f"V={target_v:.2f}, Steer={steering_angle_deg:.2f}°")
         else:
             # Normal Pure Pursuit driving
+            # AC5: If the overtaking condition is no longer met, the flag is set to False
+            # and the phase returns to NORMAL_DRIVING.
             if self.is_overtaking:
                 self.is_overtaking = False
                 self.current_overtake_phase = OvertakePhase.NORMAL_DRIVING
@@ -605,7 +640,7 @@ def main(args=None):
         trajectory_planner.get_logger().info("Shutting down trajectory planner.")
     finally:
         trajectory_planner.destroy_node()
-        rclpy.shutdown
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
