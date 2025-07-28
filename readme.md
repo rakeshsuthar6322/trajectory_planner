@@ -17,6 +17,7 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 ---
 
 ## Table of Contents
+- [Key Features](#Features)
 - [Nodes](#nodes)
 - [RQT_graph](#rqt_graph)
 - [Installation](#installation)
@@ -24,6 +25,23 @@ The TrajectoryPlanner component is responsible for autonomously controlling a ve
 - [Testing](#testing)
 - [License](#license)
 
+---
+
+## ✨ Key Features
+
+* **Dual-Mode Control Strategy**: Seamlessly transitions between **Pure Pursuit** for standard route following and the **Dynamic Window Approach (DWA)** for executing safe overtaking maneuvers.
+
+* **State-Managed Overtaking**: Employs a four-phase state machine (`NORMAL_DRIVING`, `LANE_CHANGE_DEPARTURE`, `PASSING_PHASE`, `LANE_CHANGE_RETURN`) to manage the entire overtaking process. DWA evaluates trajectories using a cost function that balances target-following, collision avoidance, and path adherence.
+
+* **Dynamic Speed Adaptation**: In Pure Pursuit mode, the vehicle's speed is intelligently adjusted based on the path's curvature—slowing down for sharp turns and accelerating on straightaways to ensure stability.
+
+* **Robust Safety System**: Listens for an `/obstacle_detected` signal to bring the vehicle to an immediate stop. It also halts if the overall `/vehicle_state` is not "Driving" and ensures a safe clearance distance is maintained during all maneuvers.
+
+* **Efficient Path Management**: Continuously prunes the received path, discarding waypoints behind the vehicle to reduce computational load and improve focus on the upcoming trajectory.
+
+* **ROS2 Integration & Visualization**: Publishes `AckermannDrive` commands, subscribes to essential sensor and state data, and publishes `visualization_msgs/Marker` messages to RViz for real-time monitoring of ego and peer vehicles.
+
+---
 
 ## Nodes
 ### Node: `path and trajectory Planner`
