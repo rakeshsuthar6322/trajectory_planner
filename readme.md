@@ -2,7 +2,7 @@
 ROS2 path and trajectory planner repository(Team Elite).
 
 ## Main Contributor
-Rakesh Suthar ([@rak6827s](https://git.hs-coburg.de/rak6827s))
+Rakesh Suthar ([@rakeshsuthar6322](https://github.com/rakeshsuthar6322))
 
 ## Component Description
 
