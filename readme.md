@@ -106,7 +106,7 @@ AC10: When the control algorithm switches (e.g., from Pure Pursuit to DWA, or up
 ## Installation
 1. Clone the repository:
 ```bash
- git clone https://git.hs-coburg.de/The_ELITE/TheElite_trajectory_planner.git
+ git clone https://github.com/rakeshsuthar6322/trajectory_planner.git
 ```
 2. Build the package:
 ```bash
