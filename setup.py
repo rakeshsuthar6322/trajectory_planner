@@ -13,9 +13,9 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='autonomous',
-    maintainer_email='ann2716s@hs-coburg.de',
-    description='TODO: Package description',
+    maintainer='Rakesh Suthar',
+    maintainer_email='rakeshsuthar6322@gmail.com',
+    description='Trajectory Planner for model car in model city environment',
     license='Apache-2.0',
     tests_require=['pytest'],
     entry_points={
