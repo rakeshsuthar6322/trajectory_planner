@@ -8,7 +8,7 @@ A ROS2 path and trajectory planning system for autonomous vehicle control. This 
 
 ### Demo
 
-[Watch demo video](images/Demo.mp4)
+[![Trajectory Planner Demo](https://img.youtube.com/vi/_enGm8Vtt6A/0.jpg)](https://www.youtube.com/watch?v=_enGm8Vtt6A)
 
 ## Key Features
 
