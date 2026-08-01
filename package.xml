@@ -4,7 +4,7 @@
   <name>tp_package</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="ann2716s@hs-coburg.de">autonomous</maintainer>
+  <maintainer email="rakeshsuthar6322@gmail.com">Rakesh Suthar</maintainer>
   <license>Apache-2.0</license>
   
   <exec_depend>el_msgs</exec_depend>

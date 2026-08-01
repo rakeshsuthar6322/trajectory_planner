@@ -39,3 +39,7 @@ custom_msg/
 .vscode/
 __pycache__/
  
+
+.codegraph
+.ua
+graphify-out
